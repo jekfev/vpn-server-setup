@@ -1,0 +1,9 @@
+# Локальные секреты и рабочие конфиги Xray
+.env
+.env.*
+!.env.example
+configs/msk-secrets
+configs/msk-secrets.*
+!configs/msk-secrets.example
+configs/*.json
+!configs/msk-config.template.json

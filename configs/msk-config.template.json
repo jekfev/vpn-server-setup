@@ -1,0 +1,45 @@
+{
+  "log": {"loglevel": "warning"},
+  "inbounds": [{
+    "tag": "in-ru", "listen": "0.0.0.0", "port": 443, "protocol": "vless",
+    "settings": {
+      "clients": [
+        {"id":"${RU_CLIENT_01}","flow":"xtls-rprx-vision","email":"client_01"},
+        {"id":"${RU_CLIENT_02}","flow":"xtls-rprx-vision","email":"client_02"},
+        {"id":"${RU_CLIENT_03}","flow":"xtls-rprx-vision","email":"client_03"},
+        {"id":"${RU_CLIENT_04}","flow":"xtls-rprx-vision","email":"client_04"},
+        {"id":"${RU_CLIENT_05}","flow":"xtls-rprx-vision","email":"client_05"},
+        {"id":"${RU_CLIENT_06}","flow":"xtls-rprx-vision","email":"client_06"},
+        {"id":"${RU_CLIENT_07}","flow":"xtls-rprx-vision","email":"client_07"},
+        {"id":"${RU_CLIENT_08}","flow":"xtls-rprx-vision","email":"client_08"},
+        {"id":"${RU_CLIENT_09}","flow":"xtls-rprx-vision","email":"client_09"},
+        {"id":"${RU_CLIENT_10}","flow":"xtls-rprx-vision","email":"client_10"},
+        {"id":"${RU_CLIENT_11}","flow":"xtls-rprx-vision","email":"client_11"},
+        {"id":"${RU_CLIENT_TEST}","flow":"xtls-rprx-vision","email":"client_test"}
+      ],
+      "decryption":"none"
+    },
+    "streamSettings":{"network":"tcp","security":"reality","realitySettings":{
+      "dest":"127.0.0.1:8443","serverNames":["${RU_REALITY_DEST}"],
+      "privateKey":"${RU_REALITY_PRIVATE_KEY}","shortIds":["${RU_REALITY_SHORT_ID}"],"alpn":["http/1.1"]
+    }},
+    "sniffing":{"enabled":true,"destOverride":["http","tls","quic"]},
+    "fallbacks":[{"dest":"127.0.0.1:8443"}]
+  }],
+  "outbounds":[
+    {"tag":"out-exit","protocol":"vless","settings":{"vnext":[{"address":"${RIGA_IP}","port":443,"users":[{"id":"${RIGA_UUID}","encryption":"none","flow":"xtls-rprx-vision"}]}]},"streamSettings":{"network":"tcp","security":"reality","realitySettings":{"serverName":"www.cloudflare.com","fingerprint":"chrome","publicKey":"${RIGA_PUBLIC_KEY}","shortId":"${RIGA_SHORT_ID}","spiderX":"/"}}},
+    {"tag":"out-exit-new","protocol":"vless","settings":{"vnext":[{"address":"${RIGA_NEW_IP}","port":443,"users":[{"id":"${RIGA_NEW_UUID}","encryption":"none","flow":"xtls-rprx-vision"}]}]},"streamSettings":{"network":"tcp","security":"reality","realitySettings":{"serverName":"www.cloudflare.com","fingerprint":"chrome","publicKey":"${RIGA_NEW_PUBLIC_KEY}","shortId":"${RIGA_NEW_SHORT_ID}","spiderX":"/"}},"sockopt":{"domainStrategy":"UseIPv4"}},
+    {"tag":"block","protocol":"blackhole"},
+    {"tag":"direct","protocol":"freedom","settings":{"domainStrategy":"UseIPv4"}},
+    {"tag":"out-exit-riga5","protocol":"vless","settings":{"vnext":[{"address":"${RIGA5_IP}","port":443,"users":[{"id":"${RIGA5_UUID}","encryption":"none","flow":"xtls-rprx-vision"}]}]},"streamSettings":{"network":"tcp","security":"reality","realitySettings":{"serverName":"www.cloudflare.com","fingerprint":"chrome","publicKey":"${RIGA5_PUBLIC_KEY}","shortId":"${RIGA5_SHORT_ID}","spiderX":"/"}},"sockopt":{"domainStrategy":"UseIPv4"}},
+    {"tag":"out-kz","protocol":"vless","settings":{"vnext":[{"address":"${KZ_IP}","port":443,"users":[{"id":"${KZ_UUID}","encryption":"none","flow":"xtls-rprx-vision"}]}]},"streamSettings":{"network":"tcp","security":"reality","realitySettings":{"serverName":"www.samsung.com","fingerprint":"chrome","publicKey":"${KZ_PUBLIC_KEY}","shortId":"${KZ_SHORT_ID}","spiderX":"/"}}}
+  ],
+  "routing":{"domainStrategy":"IPIfNonMatch","rules":[
+    {"type":"field","ip":["geoip:private"],"outboundTag":"block"},
+    {"type":"field","user":["client_test"],"network":"tcp,udp","outboundTag":"direct"},
+    {"type":"field","domain":["geosite:category-ru"],"outboundTag":"direct"},
+    {"type":"field","ip":["geoip:ru"],"outboundTag":"direct"},
+    {"type":"field","user":["client_10","client_11"],"outboundTag":"out-kz"},
+    {"type":"field","network":"tcp,udp","outboundTag":"out-exit-riga5"}
+  ]}
+}
